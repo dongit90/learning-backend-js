@@ -5,7 +5,7 @@ const morgan = require('morgan')
 //hide server info (node server, java server, ...)
 const helmet = require('helmet')
 const compression  = require('compression')
-const db = require('./dbs/init.mongodb.lv0')
+const db = require('./dbs/init.mongodb')
 
 //init middle ware 
 app.use(morgan("dev"))
