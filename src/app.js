@@ -11,9 +11,13 @@ const {countConnect} = require('./helpers/check.connect')
 app.use(morgan("dev"))
 app.use(morgan("helmet"))
 app.use(morgan("compression"))
+app.use(express.json())
+app.use(express.urlencoded({
+    extended: true
+}))
 
 //init db
-const db = require('./dbs/init.mongodb')
+require('./dbs/init.mongodb')
 //init routes
 app.use('/', require('./routes'))
 

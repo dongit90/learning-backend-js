@@ -5,6 +5,7 @@ const shopModel = require("../models/shop.model")
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const KeyTokenService = require('./keyToken.service')
+const {createTokenPair} = require('../auth/authUtils')
 const RoleShop = {
     SHOP: 'SHOP',
     WRITER: 'WRITER',
@@ -47,6 +48,20 @@ class AccessService{
                     }
                 }
                 //const tokens 
+                const tokens = await createTokenPair({userId: newShop._id, email}, publicKey, privateKey)
+                console.log(`Create token Success::`, tokens)
+                return {
+                    code: 201,
+                    metadata: {
+                        shop: newShop,
+                        tokens
+                    }
+                }
+            }
+
+            return {
+                code: 200,
+                metadata: null
             }
         }catch(error){
             return {
