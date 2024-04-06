@@ -5,7 +5,7 @@ const morgan = require('morgan')
 //hide server info (node server, java server, ...)
 const helmet = require('helmet')
 const compression  = require('compression')
-const db = require('./dbs/init.mongodb')
+const {countConnect} = require('./helpers/check.connect') 
 
 //init middle ware 
 app.use(morgan("dev"))
@@ -13,13 +13,9 @@ app.use(morgan("helmet"))
 app.use(morgan("compression"))
 
 //init db
-
+const db = require('./dbs/init.mongodb')
 //init routes
-app.get('/', (req, res, next) => {
-    return res.status(200).json({
-        message: 'Welcom Fantipjs'
-    })
-});
+app.use('/', require('./routes'))
 
 //handling error
 
