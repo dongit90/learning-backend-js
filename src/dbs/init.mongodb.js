@@ -15,7 +15,7 @@ class Database {
             mongoose.set('debug', true)
             mongoose.set('debug', {color : true})
         }
-        mongoose.connect( connectStrin, {maxPoolSize: 50}).then ( _ => console.log(`Connected Mongodb Success`))
+        mongoose.connect( connectString, {maxPoolSize: 50}).then ( _ => console.log(`Connected Mongodb Success`))
         .catch(err => console.log(`Error Connect`))
 
     }
@@ -29,6 +29,5 @@ class Database {
 }
 
 
-
-
-module.exports = mongoose
+const instanceMongodb = Database.getInstance()
+module.exports = instanceMongodb
