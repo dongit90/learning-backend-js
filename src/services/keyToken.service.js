@@ -16,11 +16,13 @@ class KeyTokenService{
             const publicKeyString = publicKey.toString()
             const tokens  = await keytokenModel.create({
                 user: userId,
-                publicKey: publicKeyString
+                publicKey: publicKeyString,
+                refreshToken: []
             })
             return tokens ? publicKeyString : null
            
         }catch(error){
+            console.log(error)
             return error;
         }
     }
