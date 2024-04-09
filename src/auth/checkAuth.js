@@ -52,9 +52,9 @@ const permission = (permission) => {
     }
 }
 
-const asyncHandler = fb => {
+const asyncHandler = fn => {
     return (req, res, next) => {
-        fn((req, res, next).catch(next)
+        fn(req, res, next).catch(next)
     }
 }
 module.exports = {

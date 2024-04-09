@@ -30,8 +30,9 @@ class OK extends SuccessResponse {
 }
 
 class CREATED extends SuccessResponse {
-    constructor({message, statusCode = StatusCode.CREATED, reasonStatusCode = ReasonStatusCode.CREATED, metadata}){
+    constructor({option = {}, message, statusCode = StatusCode.CREATED, reasonStatusCode = ReasonStatusCode.CREATED, metadata}){
         super({message, metadata})
+        this.option = option
     }
 }
 module.exports  = {
