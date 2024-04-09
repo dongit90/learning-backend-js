@@ -5,6 +5,7 @@ const shopModel = require("../models/shop.model")
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const keytokenModel = require("../models/keytoken.model")
+const { Types } = require("mongoose")
 const RoleShop = {
     SHOP: 'SHOP',
     WRITER: 'WRITER',
@@ -23,6 +24,18 @@ class KeyTokenService{
             console.log(error)
             return error;
         }
+    }
+
+    static findByUserId = async (userId) =>{
+        return await keytokenModel.findOne({user: new Types.ObjectId(userId)}).lean()
+    }
+
+    static removeById = async(id) => {
+        return await keytokenModel.deleteOne(id)
+    }
+
+    static findByRefreshTokenUsed = async (refreshToken) => {
+        return await keytokenModel.findOne({refreshTokensUsed: refreshToken})
     }
 }
 
