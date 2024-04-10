@@ -5,11 +5,12 @@ const shopModel = require("../models/shop.model")
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const KeyTokenService = require('./keyToken.service')
-const {createTokenPair} = require('../auth/authUtils')
+const {createTokenPair, verifyJWT} = require('../auth/authUtils')
 const {getInfoData} = require('../utils/index')
 const { format } = require("path")
 const { BadRequestError, ConflictRequestError } = require("../core/error.response")
 const { findByEmail } = require("./shop.service")
+const { findOneAndUpdate } = require("../models/keytoken.model")
 const RoleShop = {
     SHOP: 'SHOP',
     WRITER: 'WRITER',
@@ -19,9 +20,57 @@ class AccessService{
 
 
     static handleRefreshToken = async (refreshToken) => {
+        //check xem token da duoc su dung chua
         const foundToken = await KeyTokenService.findByRefreshTokenUsed(refreshToken)
-        if(found){
-            
+        if(foundToken){
+            //if exist, delete 
+            const {userId, email} = await verifyJWT(refreshToken, foundToken.privateKey)           
+            await KeyTokenService.deleteKeyById(userId)
+            throw new BadRequestError('Token reused')
+        }
+
+        const holderToken = await KeyTokenService.findByRefreshToken(refreshToken)
+        if (!holderToken) throw new BadRequestError('Token not existed')
+
+        //verify token
+        const {userId, email} = await verifyJWT(refreshToken, holderToken.privateKey)
+        console.log({userId, email})
+        const foundShop = await findByEmail({email})
+        if (!foundShop)throw new BadRequestError('User not existed')
+
+        //create tokens
+        const tokens = await createTokenPair({userId, email}, holderToken.publicKey, holderToken.privateKey)
+
+        //update token
+
+        await KeyTokenService.findOneAndUpdate(holderToken._id, tokens.refreshToken)
+
+        return {
+            user: {userId, email},
+            tokens
+        }
+    }
+
+    static handleRefreshTokenV2 = async ({keyStore, user, refreshToken}) => {
+        const {userId , email} = user;
+        //check xem token da duoc su dung chua
+        if (keyStore.refreshTokensUsed.includes(refreshToken)){
+            await KeyTokenService.deleteKeyById(userId)
+            throw new BadRequestError('Token reused')
+        }
+        if (keyStore.refreshToken !== refreshToken){
+            throw new BadRequestError('User not existed')
+        }        
+        const foundShop = await findByEmail({email})
+        if (!foundShop)
+        throw new BadRequestError('User not existed')
+        //create tokens
+        const tokens = await createTokenPair({userId, email}, keyStore.publicKey, keyStore.privateKey)
+        //update token
+        await KeyTokenService.findOneAndUpdate(keyStore._id, tokens.refreshToken)
+        return {
+            user: {userId, email},
+            tokens
         }
     }
     static logout = async(keyStore) => {

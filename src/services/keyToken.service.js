@@ -27,7 +27,7 @@ class KeyTokenService{
     }
 
     static findByUserId = async (userId) =>{
-        return await keytokenModel.findOne({user: new Types.ObjectId(userId)}).lean()
+        return await keytokenModel.findOne({user: new Types.ObjectId(userId)})
     }
 
     static removeById = async(id) => {
@@ -35,8 +35,29 @@ class KeyTokenService{
     }
 
     static findByRefreshTokenUsed = async (refreshToken) => {
-        return await keytokenModel.findOne({refreshTokensUsed: refreshToken})
+        return await keytokenModel.findOne({refreshTokensUsed: refreshToken}).lean()
     }
+
+    static deleteKeyById = async (userId) => {
+        return await keytokenModel.findByIdAndDelete({user: userId}).lean()
+    }
+
+    static findByRefreshToken = async (refreshToken) => {
+        return await keytokenModel.findOne({refreshToken: refreshToken}).lean()
+    }
+
+    static findOneAndUpdate = async (id, refreshToken) => {
+        return await keytokenModel.findOneAndUpdate({_id: id},
+        {
+            $set: {
+                refreshToken: refreshToken
+            },
+            $addToSet: {
+                refreshTokensUsed: refreshToken
+            }
+        })
+    }
+
 }
 
 module.exports = KeyTokenService
