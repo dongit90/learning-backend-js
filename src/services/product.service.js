@@ -1,23 +1,46 @@
 'use strict'
 
 const { BadRequestError } = require("../core/error.response");
-const { product, clothing, electronic } = require("../models/product.model")
+const { product, clothing, electronic } = require("../models/product.model");
+const { insertInventory } = require("../models/repositories/inventory.repo");
+const { queryProduct, publicProductByShop, updateProductById } = require("../models/repositories/product.repo");
 
 
 class ProductFactory {
     /*
 
     */
+
+    static productRegistry = {}
+
+    static registerProductType(type, classRef){
+        ProductFactory.productRegistry[type] = classRef
+    }
+
     static async createProduct(type, payload){
-        console.log("log data", type, payload)
-        switch (type){
-            case 'Electronics':
-                return new Electronics(payload).createProduct()
-            case 'Clothing':
-                return new Clothing(payload).createProduct()
-            default:
-                throw new BadRequestError('Invalid Product Type')
-        }
+        const productClass = ProductFactory.productRegistry[type]
+        if (!productClass) throw new BadRequestError('Invalid Product Type')
+        return new productClass(payload).createProduct()
+    }
+
+    static async updateProduct(type, productId, payload){
+        const productClass = ProductFactory.productRegistry[type]
+        if (!productClass) throw new BadRequestError('Invalid Product Type')
+        return new productClass(payload).updateProduct(productId)
+    }
+
+    static async findAllDraftsForShop({product_shop}, limit = 50, skip = 0){
+        const query = {product_shop, isDraft: true}
+        return await queryProduct({query, limit, skip})
+    }
+
+    static async publishProductByShop({product_shop, product_id}){        
+        return await publicProductByShop({product_shop, product_id})
+    }
+
+    static async findAllPublicForShop({product_shop}, limit = 50, skip = 0){
+        const query = {product_shop, isPublic: true}
+        return await queryProduct({query, limit, skip})
     }
 }
 
@@ -39,7 +62,21 @@ class Product {
     }
     // create new product
     async createProduct(product_id){
-        return await product.create({...this, _id: product_id})
+        const newProduct =  await product.create({...this, _id: product_id})
+        if (newProduct){
+            await insertInventory({
+                productId: newProduct._id,
+                shopId: this.product_shop,
+                stock: this.product_quantity
+
+            })
+        }
+        return newProduct
+    }
+
+    // update product
+    async updateProduct(productId, bodyUpdate){
+        return await updateProductById({productId, bodyUpdate, model: product})
     }
 }
 
@@ -56,6 +93,16 @@ class Clothing extends Product{
         if (!newProduct) throw new BadRequestError('create new Clothing eror')
         return newProduct
     }
+
+    async updateProduct(productId){
+        const objectParams = this
+        if (objectParams.product_attributes){
+            await updateProductById({productId, bodyUpdate: objectParams.product_attributes, model: clothing})
+        }
+
+        const updateProduct = await super.updateProduct(productId, objectParams)
+
+    }
 }
 
 class Electronics extends Product{
@@ -70,5 +117,8 @@ class Electronics extends Product{
         return newProduct
     }
 }
+//register product types
+ProductFactory.registerProductType('Electronics', Electronics)
+ProductFactory.registerProductType('Clothing', Clothing)
 
 module.exports = ProductFactory
