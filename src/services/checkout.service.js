@@ -83,8 +83,12 @@ class CheckoutService {
 
         //remove product in cart
         if (newOrder){
-            
+
         }
+    }
+
+    static async getOrderByUser(){
+        
     }
 }
 
