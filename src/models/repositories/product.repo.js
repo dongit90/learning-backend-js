@@ -61,5 +61,6 @@ module.exports = {
     queryProduct,
     publicProductByShop,
     updateProductById,
-    checkProductByServer
+    checkProductByServer,
+    getProductById
 }
