@@ -49,8 +49,7 @@ class CheckoutService {
         }
     }
 
-    static async orderByUser({
-        shop_order_ids_new, 
+    static async orderByUser({        
         cardId, userId, user_address = {}, user_payment = {}
     }){
         const {shop_order_ids_new, checkout_order} = await CheckoutService.checkoutReview(cardId, userId, shop_order_ids)
@@ -88,7 +87,7 @@ class CheckoutService {
     }
 
     static async getOrderByUser(){
-        
+
     }
 }
 

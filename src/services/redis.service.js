@@ -3,6 +3,7 @@
 const redis = require('redis')
 const { promisify} = require('util');
 const { reservationInventory } = require('../models/repositories/inventory.repo');
+/*
 const redisClient = redis.createClient()
 
 const pexpire = promisify(redisClient.pexpire).bind(redisClient);
@@ -36,6 +37,13 @@ const aquireLock = async(productId, quantity, cartId) => {
 const releaseLock = async keyLock => {
     const delAsyncKey = promisify(redisClient.del).bind(redisClient)
     return await delAsyncKey(keyLock)
+}
+*/
+
+const aquireLock = async(productId, quantity, cartId) => {
+}
+
+const releaseLock = async keyLock => {
 }
 module.exports = {
     aquireLock,

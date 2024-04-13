@@ -10,8 +10,8 @@ class InventoryService{
         stock, product,
         shopId, localtion = '123 address'
     }){
-        const product = await getProductById(productId)
-        if (!product) throw new BadRequestError('not existed')
+        const checkProduct = await getProductById(productId)
+        if (!checkProduct) throw new BadRequestError('not existed')
         const query = {inven_shopId: shopId, inven_productId: productId}
         updateSet = {
             $inc: {
